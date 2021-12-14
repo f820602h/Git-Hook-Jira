@@ -7,10 +7,11 @@ const p = require("path");
 const l = (msg) => console.log(`husky - ${msg}`);
 const git = (args) => cp.spawnSync("git", args, { stdio: "inherit" });
 const prompt = require("prompt-sync")();
-function install(dir = ".git-hook-jira") {
+function install() {
   if (git(["rev-parse"]).status !== 0) {
     return;
   }
+  const dir = ".git_hook_jira";
   const host_104 = "https://jira.104.com.tw";
   const username = prompt("your jira username: ");
   const hostname = prompt(`your jira hostname (${host_104}): `);
