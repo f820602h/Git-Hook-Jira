@@ -1,8 +1,9 @@
 #!/bin/sh
 selfDir=$(cd "$(dirname "$0")"; pwd)
+echo $selfDir
 
 JIRA_HOST_104="https://jira.104.com.tw"
-MAIN_FILE_DIR="$selfDir/.git_hook_jira"
+MAIN_FILE_DIR="./.git_hook_jira"
 GIT_IGNORE_DIR="$MAIN_FILE_DIR/.gitignore"
 JIRA_USERNAME_DIR="$MAIN_FILE_DIR/.jira_username"
 JIRA_HOST_DIR="$MAIN_FILE_DIR/.jira_host"
@@ -10,7 +11,7 @@ mkdir $MAIN_FILE_DIR
 touch $GIT_IGNORE_DIR
 printf "*" > $GIT_IGNORE_DIR
 
-PRE_PUSH_DIR="./pre-push"
+PRE_PUSH_DIR="${selfDir}/pre-push"
 GIT_HOOK_DIR="./.git/hooks/"
 GIT_HOOK_PRE_PUSH_DIR="./.git/hooks/pre-push"
 cp -i $PRE_PUSH_DIR $GIT_HOOK_DIR
