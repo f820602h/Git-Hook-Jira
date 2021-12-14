@@ -2,7 +2,7 @@
   "name": "git-hook-jira",
   "version": "1.0.0",
   "description": "use git hook to add jira worklog",
-  "bin": "index",
+  "bin": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/f820602h/git-hook-jira/issues"
   },
-  "homepage": "https://github.com/f820602h/git-hook-jira#readme"
+  "homepage": "https://github.com/f820602h/git-hook-jira#readme",
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  }
 }
