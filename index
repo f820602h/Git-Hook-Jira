@@ -3,7 +3,8 @@
 JIRA_HOST_104="https://jira.104.com.tw"
 MAIN_FILE_DIR="./.git_hook_jira"
 GIT_IGNORE_DIR="$MAIN_FILE_DIR/.gitignore"
-JIRA_CONFIG_DIR="$MAIN_FILE_DIR/jira_config.txt"
+JIRA_USERNAME_DIR="$MAIN_FILE_DIR/.jira_username"
+JIRA_HOST_DIR="$MAIN_FILE_DIR/.jira_host"
 mkdir $MAIN_FILE_DIR
 touch $GIT_IGNORE_DIR
 printf "*" > $GIT_IGNORE_DIR
@@ -20,5 +21,7 @@ read -p "jira hostname: ($JIRA_HOST_104) " JIRA_HOST
 if [[ "$JIRA_HOST" == "" ]]
 then JIRA_HOST=$JIRA_HOST_104
 fi
-touch $JIRA_CONFIG_DIR
-printf "username:\"${JIRA_USERNAME}\"\nhost:\"${JIRA_HOST}\"" > $JIRA_CONFIG_DIR
+touch $JIRA_USERNAME_DIR
+printf $JIRA_USERNAME > $JIRA_USERNAME_DIR
+touch $JIRA_HOST_DIR
+printf $JIRA_HOST > $JIRA_HOST_DIR
