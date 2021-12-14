@@ -6,19 +6,24 @@ if [[ "$YN" != "y" && "$YN" != "Y" ]]
 then exit 0
 fi
 
-BRANCH_NAME=$(git symbolic-ref --short HEAD)
-
 LOGOUT="logout"
 LOGIN="login"
 JIRA_LOGIN_STATUS=$LOGOUT
-SESSION_FILE_DIR="./.husky/_/jira_session.txt"
-touch $SESSION_FILE_DIR
-SESSION_ID=$(cat $SESSION_FILE_DIR)
 
-if [[ "$SESSION_ID" != "" ]]
+MAIN_FILE_DIR="./.git_hook_jira"
+JIRA_USERNAME_DIR="$MAIN_FILE_DIR/.jira_username"
+JIRA_HOST_DIR="$MAIN_FILE_DIR/.jira_host"
+JIRA_SESSION_DIR="$MAIN_FILE_DIR/.jira_session"
+
+touch $JIRA_SESSION_DIR
+JIRA_SESSION=$(cat $JIRA_SESSION_DIR)
+JIRA_USERNAME=$(cat $JIRA_USERNAME_DIR)
+JIRA_HOST=$(cat $JIRA_HOST_DIR)
+
+if [[ "$JIRA_SESSION" != "" ]]
 then 
   echo "[JIRA] check jira login status..."
-  AUTH_RESULT=$(curl -s -w "%{http_code}" --request GET -H "Content-Type:application/json" --cookie "JSESSIONID=${SESSION_ID}" -m 20 https://jira.104.com.tw/rest/auth/1/session)
+  AUTH_RESULT=$(curl -s -w "%{http_code}" --request GET -H "Content-Type:application/json" --cookie "JSESSIONID=${JIRA_SESSION}" -m 20 ${JIRA_HOST}/rest/auth/1/session)
   AUTH_HTTP_CODE=${AUTH_RESULT: -3}
   if test $AUTH_HTTP_CODE -eq 200
   then 
@@ -32,20 +37,19 @@ fi
 
 if [[ "$JIRA_LOGIN_STATUS" == "$LOGOUT" ]]
 then
-  read -p "jira username: " JIRA_USERNAME
   read -s -p "jira password: " JIRA_PASSWORD
   echo "\n[JIRA] login jira..."
 
   LOGIN_PAYLOAD="{\"username\": \"${JIRA_USERNAME}\", \"password\": \"${JIRA_PASSWORD}\"}"
-  LOGIN_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" -m 20 https://jira.104.com.tw/rest/auth/1/session --data "${LOGIN_PAYLOAD}")
+  LOGIN_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" -m 20 ${JIRA_HOST}/rest/auth/1/session --data "${LOGIN_PAYLOAD}")
   LOGIN_HTTP_CODE=${LOGIN_RESULT: -3}
 
   case $LOGIN_HTTP_CODE in 
     200) 
       JIRA_LOGIN_STATUS=$LOGIN
       SESSION_REGEX="\"value\":(\"\w*\")"
-      SESSION_ID=$(echo $LOGIN_RESULT | grep -Eo $SESSION_REGEX | cut -d: -f2)
-      printf $SESSION_ID > $SESSION_FILE_DIR
+      JIRA_SESSION=$(echo $LOGIN_RESULT | grep -Eo $SESSION_REGEX | cut -d: -f2)
+      printf $JIRA_SESSION > $JIRA_SESSION_DIR
       echo "\033[32m[JIRA] jira login success!\033[0m"
       ;;
     401) 
@@ -53,7 +57,7 @@ then
       exit 1
       ;;
     *) 
-      echo "\033[31m[JIRA] jira login fail!\033[0m"
+      echo "\033[31m[JIRA] check your network connection or VPN!\033[0m"
       exit 1
       ;;
   esac
@@ -61,6 +65,7 @@ fi
 
 if [[ "$JIRA_LOGIN_STATUS" == "$LOGIN" ]]
 then
+  BRANCH_NAME=$(git symbolic-ref --short HEAD)
   read -p "jira issue id: ($BRANCH_NAME) " ISSUE_ID
   if [[ "$ISSUE_ID" == "" ]]
   then ISSUE_ID=$BRANCH_NAME
@@ -72,7 +77,7 @@ then
   WORK_LOG_PAYLOAD="{\"started\": \"${WORK_LOG_STARTED}\", \"timeSpentSeconds\": \"${WORK_LOG_SECOND}\"}"
 
   echo "[JIRA] adding worklog..."
-  WORK_LOG_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" --cookie "JSESSIONID=${SESSION_ID}" -m 20 "https://jira.104.com.tw/rest/api/2/issue/${ISSUE_ID}/worklog" --data "${WORK_LOG_PAYLOAD}")
+  WORK_LOG_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" --cookie "JSESSIONID=${JIRA_SESSION}" -m 20 "${JIRA_HOST}/rest/api/2/issue/${ISSUE_ID}/worklog" --data "${WORK_LOG_PAYLOAD}")
   WORK_LOG_HTTP_CODE=${WORK_LOG_RESULT: -3}
 
   case $WORK_LOG_HTTP_CODE in 
