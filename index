@@ -4,7 +4,6 @@ JIRA_HOST_104="https://jira.104.com.tw"
 MAIN_FILE_DIR="./.git_hook_jira"
 GIT_IGNORE_DIR="$MAIN_FILE_DIR/.gitignore"
 JIRA_CONFIG_DIR="$MAIN_FILE_DIR/jira_config.txt"
-
 mkdir $MAIN_FILE_DIR
 touch $GIT_IGNORE_DIR
 printf "*" > $GIT_IGNORE_DIR
