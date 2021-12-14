@@ -10,7 +10,7 @@ LOGOUT="logout"
 LOGIN="login"
 JIRA_LOGIN_STATUS=$LOGOUT
 
-MAIN_FILE_DIR="./.git_hook_jira"
+MAIN_FILE_DIR="./.git-hook-jira"
 JIRA_USERNAME_DIR="$MAIN_FILE_DIR/.jira_username"
 JIRA_HOST_DIR="$MAIN_FILE_DIR/.jira_host"
 JIRA_SESSION_DIR="$MAIN_FILE_DIR/.jira_session"

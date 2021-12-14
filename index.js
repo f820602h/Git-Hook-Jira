@@ -11,7 +11,7 @@ function install() {
   if (git(["rev-parse"]).status !== 0) {
     return;
   }
-  const dir = ".git_hook_jira";
+  const dir = ".git-hook-jira";
   const host_104 = "https://jira.104.com.tw";
   const username = prompt("your jira username: ");
   const hostname = prompt(`your jira hostname (${host_104}): `);
