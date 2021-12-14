@@ -1,0 +1,96 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+exec < /dev/tty
+read -p "do you want to add jira worklog? (y/n)" YN
+if [[ "$YN" != "y" && "$YN" != "Y" ]]
+then exit 0
+fi
+
+BRANCH_NAME=$(git symbolic-ref --short HEAD)
+
+LOGOUT="logout"
+LOGIN="login"
+JIRA_LOGIN_STATUS=$LOGOUT
+SESSION_FILE_DIR="./.husky/_/jira_session.txt"
+touch $SESSION_FILE_DIR
+SESSION_ID=$(cat $SESSION_FILE_DIR)
+
+if [[ "$SESSION_ID" != "" ]]
+then 
+  echo "[JIRA] check jira login status..."
+  AUTH_RESULT=$(curl -s -w "%{http_code}" --request GET -H "Content-Type:application/json" --cookie "JSESSIONID=${SESSION_ID}" -m 20 https://jira.104.com.tw/rest/auth/1/session)
+  AUTH_HTTP_CODE=${AUTH_RESULT: -3}
+  if test $AUTH_HTTP_CODE -eq 200
+  then 
+    echo "\033[32m[JIRA] jira already login!\033[0m"
+    JIRA_LOGIN_STATUS=$LOGIN
+  else
+    echo "\033[33m[JIRA] jira session expired, please login again!\033[0m"
+    JIRA_LOGIN_STATUS=$LOGOUT
+  fi
+fi
+
+if [[ "$JIRA_LOGIN_STATUS" == "$LOGOUT" ]]
+then
+  read -p "jira username: " JIRA_USERNAME
+  read -s -p "jira password: " JIRA_PASSWORD
+  echo "\n[JIRA] login jira..."
+
+  LOGIN_PAYLOAD="{\"username\": \"${JIRA_USERNAME}\", \"password\": \"${JIRA_PASSWORD}\"}"
+  LOGIN_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" -m 20 https://jira.104.com.tw/rest/auth/1/session --data "${LOGIN_PAYLOAD}")
+  LOGIN_HTTP_CODE=${LOGIN_RESULT: -3}
+
+  case $LOGIN_HTTP_CODE in 
+    200) 
+      JIRA_LOGIN_STATUS=$LOGIN
+      SESSION_REGEX="\"value\":(\"\w*\")"
+      SESSION_ID=$(echo $LOGIN_RESULT | grep -Eo $SESSION_REGEX | cut -d: -f2)
+      printf $SESSION_ID > $SESSION_FILE_DIR
+      echo "\033[32m[JIRA] jira login success!\033[0m"
+      ;;
+    401) 
+      echo "\033[31m[JIRA] your username or password is wrong!\033[0m"
+      exit 1
+      ;;
+    *) 
+      echo "\033[31m[JIRA] jira login fail!\033[0m"
+      exit 1
+      ;;
+  esac
+fi
+
+if [[ "$JIRA_LOGIN_STATUS" == "$LOGIN" ]]
+then
+  read -p "jira issue id: ($BRANCH_NAME) " ISSUE_ID
+  if [[ "$ISSUE_ID" == "" ]]
+  then ISSUE_ID=$BRANCH_NAME
+  fi
+  read -p "worklog time(h): " WORK_LOG_HOUR
+  SECOND_PRE_HOUR=3600
+  WORK_LOG_SECOND=$(echo "scale=0; ${WORK_LOG_HOUR%\h} * $SECOND_PRE_HOUR / 1" | bc)
+  WORK_LOG_STARTED=$(date -v -${WORK_LOG_SECOND}S +%Y-%m-%dT%H:%M:%S.000%z);
+  WORK_LOG_PAYLOAD="{\"started\": \"${WORK_LOG_STARTED}\", \"timeSpentSeconds\": \"${WORK_LOG_SECOND}\"}"
+
+  echo "[JIRA] adding worklog..."
+  WORK_LOG_RESULT=$(curl -s -w "%{http_code}" --request POST -H "Content-Type:application/json" --cookie "JSESSIONID=${SESSION_ID}" -m 20 "https://jira.104.com.tw/rest/api/2/issue/${ISSUE_ID}/worklog" --data "${WORK_LOG_PAYLOAD}")
+  WORK_LOG_HTTP_CODE=${WORK_LOG_RESULT: -3}
+
+  case $WORK_LOG_HTTP_CODE in 
+    201) 
+      echo "\033[32m[JIRA] worklog adding success!\033[0m"
+      ;;
+    404) 
+      echo "\033[31m[JIRA] issue does not exist!\033[0m"
+      exit 1
+      ;;
+    403) 
+      echo "\033[31m[JIRA] you do not have permission of this issue!\033[0m"
+      exit 1
+      ;;
+    *) 
+      echo "\033[31m[JIRA] worklog adding fail!\033[0m"
+      exit 1
+      ;;
+  esac
+fi

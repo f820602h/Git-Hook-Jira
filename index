@@ -1,0 +1,23 @@
+#!/bin/sh
+
+JIRA_HOST_104="https://jira.104.com.tw"
+MAIN_FILE_DIR="./.git_hook_jira"
+GIT_IGNORE_DIR="$MAIN_FILE_DIR/.gitignore"
+JIRA_CONFIG_DIR="$MAIN_FILE_DIR/jira_config.txt"
+
+mkdir $MAIN_FILE_DIR
+touch $GIT_IGNORE_DIR
+printf "*" > $GIT_IGNORE_DIR
+
+PRE_PUSH_DIR="./pre-push"
+GIT_HOOK_DIR="./.git/hooks/"
+cp $PRE_PUSH_DIR $GIT_HOOK_DIR
+
+exec < /dev/tty
+read -p "jira username: " JIRA_USERNAME
+read -p "jira hostname: ($JIRA_HOST_104) " JIRA_HOST
+if [[ "$JIRA_HOST" == "" ]]
+then JIRA_HOST=$JIRA_HOST_104
+fi
+touch $JIRA_CONFIG_DIR
+printf "username:\"${JIRA_USERNAME}\"\nhost:\"${JIRA_HOST}\"" > $JIRA_CONFIG_DIR
