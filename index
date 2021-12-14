@@ -11,8 +11,9 @@ printf "*" > $GIT_IGNORE_DIR
 
 PRE_PUSH_DIR="./pre-push"
 GIT_HOOK_DIR="./.git/hooks/"
-chmod +x $PRE_PUSH_DIR
+GIT_HOOK_PRE_PUSH_DIR="./.git/hooks/pre-push"
 cp -i $PRE_PUSH_DIR $GIT_HOOK_DIR
+chmod +x $GIT_HOOK_PRE_PUSH_DIR
 
 exec < /dev/tty
 read -p "jira username: " JIRA_USERNAME
