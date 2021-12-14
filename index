@@ -11,6 +11,7 @@ printf "*" > $GIT_IGNORE_DIR
 
 PRE_PUSH_DIR="./pre-push"
 GIT_HOOK_DIR="./.git/hooks/"
+chmod +x $PRE_PUSH_DIR
 cp $PRE_PUSH_DIR $GIT_HOOK_DIR
 
 exec < /dev/tty
