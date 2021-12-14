@@ -20,5 +20,7 @@ function install() {
   fs.writeFileSync(p.join(dir, ".jira_username"), username);
   fs.writeFileSync(p.join(dir, ".jira_host"), hostname || host_104);
   fs.copyFileSync(p.join(__dirname, "pre-push"), p.join(".git/hooks/pre-push"));
+
+  console.log("git-hook-jira is installed");
 }
 install();
