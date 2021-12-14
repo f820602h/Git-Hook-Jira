@@ -2,10 +2,7 @@
   "name": "git-hook-jira",
   "version": "1.0.0",
   "description": "use git hook to add jira worklog",
-  "main": "index.js",
-  "bin": {
-    "git-hook-jira": "index.js"
-  },
+  "bin": "index",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
