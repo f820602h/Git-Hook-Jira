@@ -10,7 +10,7 @@ use git hook to add jira worklog
    ```
 2. Install `git-hook-jira`.
    ```
-   yarn add https://github.com/f820602h/git-hook-jira.git --dev
+   yarn add https://github.com/f820602h/git-hook-jira.git#1.0.0 --dev
    ```
 3. Enable `pre-push` git hook, and set your jira user config.
    ```
