@@ -7,7 +7,7 @@ use git hook to add jira worklog
 3. input your jira username & hostname
 4. write some code in your project
 5. git push by using command-line
-6. add package.json script, if will be executed after install
+6. add package.json script, it will be executed after install
 ```
 // package.json
 {
